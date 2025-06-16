@@ -19,4 +19,17 @@ public abstract class Veiculo {
     public String getTipo() { return tipo; }
     public LocalDateTime getHoraEntrada() { return horaEntrada; }
     public void setHoraEntrada(LocalDateTime horaEntrada) { this.horaEntrada = horaEntrada; }
+
+    public void setPlaca(String placa) {
+        this.placa = placa;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
 }

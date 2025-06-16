@@ -32,7 +32,6 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
 
     @Override
     public void estacionar(String placa, int numeroVaga, LocalDateTime entrada) {
-        // 🚨 Validação: verificar se o veículo está cadastrado antes de estacionar
         Veiculo veiculo = veiculoRepo.buscarPorPlaca(placa);
         if (veiculo == null) {
             throw new IllegalArgumentException("Erro: Veículo não cadastrado! Primeiro, cadastre o veículo antes de estacioná-lo.");
@@ -58,29 +57,19 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             throw new IllegalArgumentException("Veículo não está estacionado.");
         }
 
-        // Encontrar a vaga ocupada pelo veículo
         Vaga vaga = vagas.stream()
                 .filter(v -> v.isOcupada() && v.getVeiculo().getPlaca().equals(placa))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Vaga não encontrada para o veículo."));
 
-        // Calcular o tempo de ocupação em minutos
         long minutosOcupado = Duration.between(veiculo.getHoraEntrada(), saida).toMinutes();
         if (minutosOcupado <= 0) minutosOcupado = 1;
 
-        // Definir o valor fixo para estacionar baseado no tipo do veículo
         double valorBase = veiculo.getTipo().equals("CARRO") ? valorCarro : valorMoto;
-
-        // Calcular frações necessárias
         double valorFrações = Math.ceil(minutosOcupado / fracaoMinutos) * valorFracaoMinutos;
-
-        // Calcular valor total (Base + Frações)
         double valorTotal = valorBase + valorFrações;
 
-        // 🚨 Importante: Liberar a vaga corretamente!
         vaga.desocupar();
-
-        // Remover a hora de entrada do veículo
         veiculo.setHoraEntrada(null);
 
         System.out.println("Veículo removido da vaga " + vaga.getNumero() + ". Tempo total: " + minutosOcupado + " min.");
@@ -92,36 +81,30 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
     @Override
     public void listarVagasLivres() {
         System.out.println("Vagas livres:");
-
-        boolean encontrouVagas = false; // Variável para verificar se há vagas disponíveis
-
+        boolean encontrouVagas = false;
         for (Vaga vaga : vagas) {
             if (!vaga.isOcupada()) {
                 System.out.println("Vaga " + vaga.getNumero() + " - Tipo: " + vaga.getTipo());
                 encontrouVagas = true;
             }
         }
-
         if (!encontrouVagas) {
             System.out.println("Nenhuma vaga disponível no momento.");
         }
     }
+
     @Override
     public void listarVagasOcupadas() {
         System.out.println("Vagas ocupadas:");
-
-        boolean encontrouVagas = false; // Variável para verificar se há vagas ocupadas
-
+        boolean encontrouVagas = false;
         for (Vaga vaga : vagas) {
             if (vaga.isOcupada()) {
                 Veiculo veiculo = vaga.getVeiculo();
                 long minutosOcupado = Duration.between(veiculo.getHoraEntrada(), LocalDateTime.now()).toMinutes();
-
                 System.out.println("Vaga " + vaga.getNumero() + " - " + veiculo.getPlaca() + " (" + veiculo.getModelo() + ") - Ocupada há " + minutosOcupado + " minutos");
                 encontrouVagas = true;
             }
         }
-
         if (!encontrouVagas) {
             System.out.println("Nenhuma vaga ocupada no momento.");
         }
@@ -129,13 +112,18 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
 
     @Override
     public void listarVeiculosEstacionados() {
-
+        System.out.println("Veículos atualmente estacionados:");
+        for (Vaga vaga : vagas) {
+            if (vaga.isOcupada()) {
+                Veiculo veiculo = vaga.getVeiculo();
+                System.out.println("Placa: " + veiculo.getPlaca() + ", Modelo: " + veiculo.getModelo() + ", Tipo: " + veiculo.getTipo() + ", Vaga: " + vaga.getNumero());
+            }
+        }
     }
 
     @Override
     public void pesquisarVeiculo(String placa) {
         Veiculo veiculo = veiculoRepo.buscarPorPlaca(placa);
-
         if (veiculo == null) {
             System.out.println("Erro: Veículo não encontrado. Verifique a placa e tente novamente.");
             return;
@@ -161,7 +149,6 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             System.out.println("Status: Fora do estacionamento.");
         }
 
-        // Perguntar ao usuário se deseja editar ou excluir o veículo
         Scanner scanner = new Scanner(System.in);
         int escolha = -1;
 
@@ -180,7 +167,6 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             System.out.print("Novo modelo: ");
             String novoModelo = scanner.nextLine();
 
-            // Validação do novo tipo
             String novoTipo;
             while (true) {
                 System.out.print("Novo tipo (CARRO/MOTO): ");
@@ -192,58 +178,19 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
                 }
             }
 
-            // Se o tipo for alterado, migrar para vaga compatível
-            if (!novoTipo.equals(veiculo.getTipo())) {
-                System.out.println("O veículo será migrado para uma vaga compatível...");
-
-                final String tipoFinal = novoTipo; // 🔥 Correção: Variável final para usar na lambda
-                Vaga novaVaga = vagas.stream()
-                        .filter(v -> !v.isOcupada() && v.getTipo().equals(tipoFinal))
-                        .findFirst()
-                        .orElse(null);
-
-                if (novaVaga != null) {
-                    novaVaga.ocupar(veiculo);
-                    System.out.println("Veículo movido para a vaga " + novaVaga.getNumero());
-                } else {
-                    System.out.println("Nenhuma vaga disponível para o novo tipo! O veículo foi removido da vaga.");
-
-                    Vaga vagaAntiga = vagas.stream()
-                            .filter(v -> v.isOcupada() && v.getVeiculo().getPlaca().equals(placa))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (vagaAntiga != null) {
-                        vagaAntiga.desocupar();
-                    }
-                }
-            }
-
             atualizarVeiculo(placa, novaPlaca, novoModelo, novoTipo);
-            System.out.println("Veículo atualizado com sucesso!");
-
         } else if (escolha == 2) {
             excluirVeiculo(placa);
-            System.out.println("Veículo excluído com sucesso!");
         }
     }
 
     @Override
     public void cadastrarVeiculo(String placa, String modelo, String tipo) {
-        // 🚨 Validação: aceitar somente "CARRO" ou "MOTO"
         if (tipo == null || (!tipo.equalsIgnoreCase("CARRO") && !tipo.equalsIgnoreCase("MOTO"))) {
             throw new IllegalArgumentException("Erro: Tipo de veículo inválido! Apenas CARRO ou MOTO são permitidos.");
         }
 
-        // Criar veículo conforme o tipo validado
-        Veiculo novoVeiculo;
-        if (tipo.equalsIgnoreCase("CARRO")) {
-            novoVeiculo = new Carro(placa, modelo);
-        } else {
-            novoVeiculo = new Motocicleta(placa, modelo);
-        }
-
-        // Salvar no repositório
+        Veiculo novoVeiculo = tipo.equalsIgnoreCase("CARRO") ? new Carro(placa, modelo) : new Motocicleta(placa, modelo);
         veiculoRepo.salvar(novoVeiculo);
         System.out.println("Veículo cadastrado com sucesso!");
     }
@@ -259,9 +206,18 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             throw new IllegalArgumentException("Erro: Tipo inválido! Apenas CARRO ou MOTO são permitidos.");
         }
 
-        Veiculo atualizado = novoTipo.equalsIgnoreCase("CARRO") ? new Carro(novaPlaca, novoModelo) : new Motocicleta(novaPlaca, novoModelo);
-        veiculoRepo.salvar(atualizado);
-        veiculoRepo.excluirPorPlaca(placa);
+        // Atualizar os dados diretamente no mesmo objeto
+        veiculo.setPlaca(novaPlaca);
+        veiculo.setModelo(novoModelo);
+        veiculo.setTipo(novoTipo);
+
+        // Se a placa mudar, ajustar o repositório
+        if (!placa.equals(novaPlaca)) {
+            veiculoRepo.excluirPorPlaca(placa);
+            veiculoRepo.salvar(veiculo);
+        }
+
+        System.out.println("Veículo atualizado com sucesso!");
     }
 
     @Override
@@ -276,22 +232,20 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
         }
 
         veiculoRepo.excluirPorPlaca(placa);
+        System.out.println("Veículo excluído com sucesso!");
     }
+
     public void listarVagasLivresPorTipo(String tipoVeiculo) {
         System.out.println("Vagas disponíveis para " + tipoVeiculo + ":");
-
-        boolean encontrouVagas = false; // Variável para verificar se há vagas disponíveis
-
+        boolean encontrouVagas = false;
         for (Vaga vaga : vagas) {
             if (!vaga.isOcupada() && vaga.getTipo().equals(tipoVeiculo)) {
                 System.out.println("Vaga " + vaga.getNumero());
                 encontrouVagas = true;
             }
         }
-
         if (!encontrouVagas) {
             System.out.println("Nenhuma vaga disponível para " + tipoVeiculo + ".");
         }
     }
-
 }
