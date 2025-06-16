@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Configuração personalizada
+
         System.out.println("### Configuração do Estacionamento ###");
         System.out.print("Quantidade de vagas para carros: ");
         int vagasCarro = scanner.nextInt();
@@ -21,10 +21,10 @@ public class Main {
         System.out.print("Quantidade de vagas para motos: ");
         int vagasMoto = scanner.nextInt();
 
-        System.out.print("Valor por hora (CARRO): ");
+        System.out.print("Taxa de estacionamento para (CARRO): ");
         double valorHoraCarro = scanner.nextDouble();
 
-        System.out.print("Valor por hora (MOTO): ");
+        System.out.print("Taxa de estacionamento para (MOTO): ");
         double valorHoraMoto = scanner.nextDouble();
 
         System.out.print("Duração da fração (em minutos): ");
@@ -32,7 +32,7 @@ public class Main {
 
         System.out.print("Valor por fração (dinheiro): ");
         double valorFracaoMinutos = scanner.nextDouble();
-        scanner.nextLine(); // Limpar buffer
+        scanner.nextLine();
 
         List<Vaga> vagas = new ArrayList<>();
         for (int i = 0; i < vagasCarro; i++) vagas.add(new Vaga(i, "CARRO"));
@@ -63,7 +63,7 @@ public class Main {
                         "....................................CICERO DIAS....................................\n" +
                         "......ALUNOS:.....LEVI DE OLIVEIRA - WILLIAM JOSE  - CIBELE COSTA..................\n");
 
-        // Interface de usuário simples
+
         while (true) {
             System.out.println("\n### Estacionamento ###");
             System.out.println("1 - Cadastrar Veículo");
@@ -76,7 +76,7 @@ public class Main {
             System.out.print("Escolha uma opção: ");
 
             int opcao = scanner.nextInt();
-            scanner.nextLine(); // Limpar buffer
+            scanner.nextLine();
 
             switch (opcao) {
                 case 1:
@@ -90,16 +90,16 @@ public class Main {
                         System.out.print("Tipo (CARRO/MOTO): ");
                         tipo = scanner.nextLine().toUpperCase();
 
-                        //  Validação: aceitar somente "CARRO" ou "MOTO"
+
                         if (tipo.equals("CARRO") || tipo.equals("MOTO")) {
-                            break; // Tipo válido, sai do loop
+                            break;
                         } else {
                             System.out.println("Erro: Tipo de veículo inválido! Apenas CARRO ou MOTO são permitidos.");
                         }
                     }
 
                     estacionamento.cadastrarVeiculo(placa, modelo, tipo);
-                    System.out.println("Veículo cadastrado com sucesso!");
+                    //System.out.println("Veículo cadastrado com sucesso!");
                     break;
 
 
@@ -107,14 +107,14 @@ public class Main {
                     System.out.print("Digite a placa do veículo: ");
                     placa = scanner.nextLine();
 
-                    // 🚨 Validação: verificar se o veículo está cadastrado antes de estacionar
+
                     Veiculo veiculo = veiculoRepo.buscarPorPlaca(placa);
                     if (veiculo == null) {
                         System.out.println("Erro: Veículo não cadastrado! Primeiro, cadastre o veículo antes de estacioná-lo.");
                         break;
                     }
 
-                    // 🔎 Listar vagas compatíveis antes de pedir a vaga (corrigido para evitar duplicação)
+
                     ((EstacionamentoServiceImpl) estacionamento).listarVagasLivresPorTipo(veiculo.getTipo());
 
                     System.out.print("Número da vaga: ");
@@ -122,7 +122,7 @@ public class Main {
 
                     try {
                         estacionamento.estacionar(placa, numeroVaga, LocalDateTime.now());
-                        System.out.println("Veículo estacionado!");
+                        //System.out.println("Veículo estacionado!");
                     } catch (IllegalArgumentException e) {
                         System.out.println("Erro ao estacionar: " + e.getMessage());
                     }

@@ -129,7 +129,7 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             return;
         }
 
-        System.out.println("🔎 Detalhes do Veículo:");
+        System.out.println("Detalhes do Veículo:");
         System.out.println("Placa: " + veiculo.getPlaca());
         System.out.println("Modelo: " + veiculo.getModelo());
         System.out.println("Tipo: " + veiculo.getTipo());
@@ -206,12 +206,12 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             throw new IllegalArgumentException("Erro: Tipo inválido! Apenas CARRO ou MOTO são permitidos.");
         }
 
-        // Atualizar os dados diretamente no mesmo objeto
+
         veiculo.setPlaca(novaPlaca);
         veiculo.setModelo(novoModelo);
         veiculo.setTipo(novoTipo);
 
-        // Se a placa mudar, ajustar o repositório
+
         if (!placa.equals(novaPlaca)) {
             veiculoRepo.excluirPorPlaca(placa);
             veiculoRepo.salvar(veiculo);
