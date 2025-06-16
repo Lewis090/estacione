@@ -248,4 +248,14 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
             System.out.println("Nenhuma vaga disponível para " + tipoVeiculo + ".");
         }
     }
+    @Override
+    public Vaga buscarVagaDoVeiculo(String placa) {
+        for (Vaga vaga : vagas) {
+            if (vaga.isOcupada() && vaga.getVeiculo().getPlaca().equalsIgnoreCase(placa)) {
+                return vaga;
+            }
+        }
+        return null; // ou lançar exceção se preferir
+    }
+
 }

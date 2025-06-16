@@ -1,5 +1,7 @@
 package service;
 
+import model.Vaga;
+
 import java.time.LocalDateTime;
 
 public interface EstacionamentoService {
@@ -14,4 +16,6 @@ public interface EstacionamentoService {
     void cadastrarVeiculo(String placa, String modelo, String tipo);
     void atualizarVeiculo(String placa, String novaPlaca, String novoModelo, String novoTipo);
     void excluirVeiculo(String placa);
+
+    Vaga buscarVagaDoVeiculo(String placa);
 }

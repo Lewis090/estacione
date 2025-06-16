@@ -13,7 +13,6 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-
         System.out.println("### Configuração do Estacionamento ###");
         System.out.print("Quantidade de vagas para carros: ");
         int vagasCarro = scanner.nextInt();
@@ -43,26 +42,25 @@ public class Main {
                 vagas, veiculoRepo, valorHoraCarro, valorHoraMoto, fracaoMinutos, valorFracaoMinutos);
 
         System.out.println("\n " +
-                        "...................................................................................\n" +
-                        ".................-+############################################*=:.................\n" +
-                        "...............:##################################################=................\n" +
-                        "..............-###################################################%+...............\n" +
-                        "..............=#######************#*************#************######*:..............\n" +
-                        "...........:::::::-###:..........:#............-#...........:###-:::::::...........\n" +
-                        "...........:::::::-###:...########%****-...+****#....###########-:::::::...........\n" +
-                        "..............+#######:...#############-...*#####....############%#*:..............\n" +
-                        "...........:*******###:..........+#####-...*#####...........####*******:...........\n" +
-                        "...........:*******###:...#############-...*#####....###########*******:...........\n" +
-                        "..............+###%###:...#######%%####-...*#####....%#########%%##*:..............\n" +
-                        "...........:*******###:...........#####-...*#####............*##*******:...........\n" +
-                        "...........:*******###:...........#####-...*#####............*##*******:...........\n" +
-                        "..............=####################################################*:..............\n" +
-                        "..............:#######*===+*+*+#=#=+-+*=+++#+#-+-+++*+=#++#########=...............\n" +
-                        "...............:##################################################-................\n" +
-                        ".................:=############################################+-..................\n" +
-                        "....................................CICERO DIAS....................................\n" +
-                        "......ALUNOS:.....LEVI DE OLIVEIRA - WILLIAM JOSE  - CIBELE COSTA..................\n");
-
+                "...................................................................................\n" +
+                ".................-+############################################*=:.................\n" +
+                "...............:##################################################=................\n" +
+                "..............-###################################################%+...............\n" +
+                "..............=#######************#*************#************######*:..............\n" +
+                "...........:::::::-###:..........:#............-#...........:###-:::::::...........\n" +
+                "...........:::::::-###:...########%****-...+****#....###########-:::::::...........\n" +
+                "..............+#######:...#############-...*#####....############%#*:..............\n" +
+                "...........:*******###:..........+#####-...*#####...........####*******:...........\n" +
+                "...........:*******###:...#############-...*#####....###########*******:...........\n" +
+                "..............+###%###:...#######%%####-...*#####....%#########%%##*:..............\n" +
+                "...........:*******###:...........#####-...*#####............*##*******:...........\n" +
+                "...........:*******###:...........#####-...*#####............*##*******:...........\n" +
+                "..............=####################################################*:..............\n" +
+                "..............:#######*===+*+*+#=#=+-+*=+++#+#-+-+++*+=#++#########=...............\n" +
+                "...............:##################################################-................\n" +
+                ".................:=############################################+-..................\n" +
+                "....................................CICERO DIAS....................................\n" +
+                "......ALUNOS:.....LEVI DE OLIVEIRA - WILLIAM JOSE  - CIBELE COSTA..................\n");
 
         while (true) {
             System.out.println("\n### Estacionamento ###");
@@ -78,10 +76,13 @@ public class Main {
             int opcao = scanner.nextInt();
             scanner.nextLine();
 
+            String placa;
+            Veiculo veiculo;
+
             switch (opcao) {
                 case 1:
                     System.out.print("Digite a placa: ");
-                    String placa = scanner.nextLine();
+                    placa = scanner.nextLine();
                     System.out.print("Digite o modelo: ");
                     String modelo = scanner.nextLine();
 
@@ -89,8 +90,6 @@ public class Main {
                     while (true) {
                         System.out.print("Tipo (CARRO/MOTO): ");
                         tipo = scanner.nextLine().toUpperCase();
-
-
                         if (tipo.equals("CARRO") || tipo.equals("MOTO")) {
                             break;
                         } else {
@@ -99,21 +98,19 @@ public class Main {
                     }
 
                     estacionamento.cadastrarVeiculo(placa, modelo, tipo);
-                    //System.out.println("Veículo cadastrado com sucesso!");
+                    pausar(scanner);
                     break;
-
 
                 case 2:
                     System.out.print("Digite a placa do veículo: ");
                     placa = scanner.nextLine();
 
-
-                    Veiculo veiculo = veiculoRepo.buscarPorPlaca(placa);
+                    veiculo = veiculoRepo.buscarPorPlaca(placa);
                     if (veiculo == null) {
                         System.out.println("Erro: Veículo não cadastrado! Primeiro, cadastre o veículo antes de estacioná-lo.");
+                        pausar(scanner);
                         break;
                     }
-
 
                     ((EstacionamentoServiceImpl) estacionamento).listarVagasLivresPorTipo(veiculo.getTipo());
 
@@ -122,32 +119,54 @@ public class Main {
 
                     try {
                         estacionamento.estacionar(placa, numeroVaga, LocalDateTime.now());
-                        //System.out.println("Veículo estacionado!");
                     } catch (IllegalArgumentException e) {
                         System.out.println("Erro ao estacionar: " + e.getMessage());
                     }
+                    scanner.nextLine();
+                    pausar(scanner);
                     break;
+
                 case 3:
                     System.out.print("Digite a placa do veículo: ");
                     placa = scanner.nextLine();
-                    double valor = estacionamento.sair(placa, LocalDateTime.now());
-                    System.out.println("Veículo removido. Valor a pagar: R$" + valor);
+                    veiculo = veiculoRepo.buscarPorPlaca(placa);
+
+                    if (veiculo == null) {
+                        System.out.println("Veículo não encontrado. Verifique a placa.");
+                    } else {
+                        Vaga vagaDoVeiculo = estacionamento.buscarVagaDoVeiculo(placa);
+
+                        if (vagaDoVeiculo == null) {
+                            System.out.println("Veículo não está estacionado.");
+                        } else {
+                            try {
+                                double valor = estacionamento.sair(placa, LocalDateTime.now());
+                                System.out.println("Veículo removido. Valor a pagar: R$" + valor);
+                            } catch (IllegalArgumentException e) {
+                                System.out.println(e.getMessage());
+                            }
+                        }
+                    }
+                    pausar(scanner);
                     break;
 
                 case 4:
                     System.out.println("Listando vagas livres...");
                     estacionamento.listarVagasLivres();
+                    pausar(scanner);
                     break;
 
                 case 5:
                     System.out.println("Listando vagas ocupadas...");
                     estacionamento.listarVagasOcupadas();
+                    pausar(scanner);
                     break;
 
                 case 6:
                     System.out.print("Digite a placa do veículo: ");
                     placa = scanner.nextLine();
                     estacionamento.pesquisarVeiculo(placa);
+                    pausar(scanner);
                     break;
 
                 case 0:
@@ -156,7 +175,13 @@ public class Main {
 
                 default:
                     System.out.println("Opção inválida!");
+                    pausar(scanner);
             }
         }
+    }
+
+    private static void pausar(Scanner scanner) {
+        System.out.println("Pressione ENTER para voltar ao menu...");
+        scanner.nextLine();
     }
 }
